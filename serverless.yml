@@ -1,0 +1,26 @@
+service: tokens
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: python3.6
+  region: us-east-1
+  environment:
+    CLIENT_ID: "5q785n67mu1sd8bbjuqj2pckj7"
+    REDIRECT_URI: "http://localhost:3000/profile"
+    COGNITO_TOKENS_ENDPOINT: "https://cloudplanner.auth.us-east-1.amazoncognito.com/oauth2/token"
+    CLIENT_SECRET: ${opt:CLIENT_SECRET}
+  memorySize: 128
+
+functions:
+  tokens:
+    name: tokens-${self:provider.stage}
+    handler: tokens/tokens.get_tokens
+    events:
+      - http:
+          path: auth
+          method: get
+          cors:
+            origin: "*"
+            headers:
+              - Access-Control-Allow-Origin

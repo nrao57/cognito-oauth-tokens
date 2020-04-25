@@ -1,0 +1,319 @@
+{
+  "service": {
+    "service": "cloudplanner-auth",
+    "serviceObject": {
+      "name": "cloudplanner-auth"
+    },
+    "provider": {
+      "stage": "dev",
+      "variableSyntax": "\\${([ ~:a-zA-Z0-9._@'\",\\-\\/\\(\\)*?]+?)}",
+      "name": "aws",
+      "runtime": "python3.6",
+      "region": "us-east-1",
+      "stackName": "CloudPlannerAuthStackdev",
+      "deploymentBucket": "cloudplanner-us-east-1-deploys-tokens-dev",
+      "environment": {
+        "CLIENT_ID": "5q785n67mu1sd8bbjuqj2pckj7",
+        "REDIRECT_URI": "http://localhost:3000/profile",
+        "COGNITO_TOKENS_ENDPOINT": "https://cloudplanner.auth.us-east-1.amazoncognito.com/oauth2/token",
+        "CLIENT_SECRET": "1hv8cfgukdom2b3hbqjkjd632a03r9uhebmmv6ufmr4fuor9hkou"
+      },
+      "role": "arn:aws:iam::547950090894:role/CloudPlannerAuthServerlessRoledev",
+      "memorySize": 128,
+      "deploymentBucketObject": {
+        "name": "cloudplanner-us-east-1-deploys-tokens-dev"
+      },
+      "versionFunctions": true,
+      "remoteFunctionData": null,
+      "compiledCloudFormationTemplate": {
+        "AWSTemplateFormatVersion": "2010-09-09",
+        "Description": "The AWS CloudFormation template for this Serverless application",
+        "Resources": {
+          "TokensLogGroup": {
+            "Type": "AWS::Logs::LogGroup",
+            "Properties": {
+              "LogGroupName": "/aws/lambda/cloudplanner-tokens-dev"
+            }
+          },
+          "TokensLambdaFunction": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+              "Code": {
+                "S3Bucket": "cloudplanner-us-east-1-deploys-tokens-dev",
+                "S3Key": "serverless/cloudplanner-auth/dev/1587260176894-2020-04-19T01:36:16.894Z/cloudplanner-auth.zip"
+              },
+              "FunctionName": "cloudplanner-tokens-dev",
+              "Handler": "tokens/tokens.get_tokens",
+              "MemorySize": 128,
+              "Role": "arn:aws:iam::547950090894:role/CloudPlannerAuthServerlessRoledev",
+              "Runtime": "python3.6",
+              "Timeout": 6,
+              "Environment": {
+                "Variables": {
+                  "CLIENT_ID": "5q785n67mu1sd8bbjuqj2pckj7",
+                  "REDIRECT_URI": "http://localhost:3000/profile",
+                  "COGNITO_TOKENS_ENDPOINT": "https://cloudplanner.auth.us-east-1.amazoncognito.com/oauth2/token",
+                  "CLIENT_SECRET": "1hv8cfgukdom2b3hbqjkjd632a03r9uhebmmv6ufmr4fuor9hkou"
+                }
+              }
+            },
+            "DependsOn": [
+              "TokensLogGroup"
+            ]
+          },
+          "TokensLambdaVersionvQtUeWj2H9TaaSQKMFRvNVfeMCAlQItcopQEAj9ZUa0": {
+            "Type": "AWS::Lambda::Version",
+            "DeletionPolicy": "Retain",
+            "Properties": {
+              "FunctionName": {
+                "Ref": "TokensLambdaFunction"
+              },
+              "CodeSha256": "D8JrarTwtUORgb9YhyHPTXXnd6i/CC/jfP10c6DFgwY="
+            }
+          },
+          "ApiGatewayRestApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+              "Name": "dev-cloudplanner-auth",
+              "EndpointConfiguration": {
+                "Types": [
+                  "EDGE"
+                ]
+              },
+              "Policy": ""
+            }
+          },
+          "ApiGatewayResourceAuth": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+              "ParentId": {
+                "Fn::GetAtt": [
+                  "ApiGatewayRestApi",
+                  "RootResourceId"
+                ]
+              },
+              "PathPart": "auth",
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodAuthOptions": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "AuthorizationType": "NONE",
+              "HttpMethod": "OPTIONS",
+              "MethodResponses": [
+                {
+                  "StatusCode": "200",
+                  "ResponseParameters": {
+                    "method.response.header.Access-Control-Allow-Origin": true,
+                    "method.response.header.Access-Control-Allow-Headers": true,
+                    "method.response.header.Access-Control-Allow-Methods": true
+                  },
+                  "ResponseModels": {}
+                }
+              ],
+              "RequestParameters": {},
+              "Integration": {
+                "Type": "MOCK",
+                "RequestTemplates": {
+                  "application/json": "{statusCode:200}"
+                },
+                "ContentHandling": "CONVERT_TO_TEXT",
+                "IntegrationResponses": [
+                  {
+                    "StatusCode": "200",
+                    "ResponseParameters": {
+                      "method.response.header.Access-Control-Allow-Origin": "'*'",
+                      "method.response.header.Access-Control-Allow-Headers": "'Access-Control-Allow-Origin'",
+                      "method.response.header.Access-Control-Allow-Methods": "'OPTIONS,GET'"
+                    },
+                    "ResponseTemplates": {
+                      "application/json": ""
+                    }
+                  }
+                ]
+              },
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceAuth"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              }
+            }
+          },
+          "ApiGatewayMethodAuthGet": {
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+              "HttpMethod": "GET",
+              "RequestParameters": {},
+              "ResourceId": {
+                "Ref": "ApiGatewayResourceAuth"
+              },
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "ApiKeyRequired": false,
+              "AuthorizationType": "NONE",
+              "Integration": {
+                "IntegrationHttpMethod": "POST",
+                "Type": "AWS_PROXY",
+                "Uri": {
+                  "Fn::Join": [
+                    "",
+                    [
+                      "arn:",
+                      {
+                        "Ref": "AWS::Partition"
+                      },
+                      ":apigateway:",
+                      {
+                        "Ref": "AWS::Region"
+                      },
+                      ":lambda:path/2015-03-31/functions/",
+                      {
+                        "Fn::GetAtt": [
+                          "TokensLambdaFunction",
+                          "Arn"
+                        ]
+                      },
+                      "/invocations"
+                    ]
+                  ]
+                }
+              },
+              "MethodResponses": []
+            }
+          },
+          "ApiGatewayDeployment1587260175089": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "Properties": {
+              "RestApiId": {
+                "Ref": "ApiGatewayRestApi"
+              },
+              "StageName": "dev"
+            },
+            "DependsOn": [
+              "ApiGatewayMethodAuthOptions",
+              "ApiGatewayMethodAuthGet"
+            ]
+          },
+          "TokensLambdaPermissionApiGateway": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+              "FunctionName": {
+                "Fn::GetAtt": [
+                  "TokensLambdaFunction",
+                  "Arn"
+                ]
+              },
+              "Action": "lambda:InvokeFunction",
+              "Principal": "apigateway.amazonaws.com",
+              "SourceArn": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition"
+                    },
+                    ":execute-api:",
+                    {
+                      "Ref": "AWS::Region"
+                    },
+                    ":",
+                    {
+                      "Ref": "AWS::AccountId"
+                    },
+                    ":",
+                    {
+                      "Ref": "ApiGatewayRestApi"
+                    },
+                    "/*/*"
+                  ]
+                ]
+              }
+            }
+          }
+        },
+        "Outputs": {
+          "ServerlessDeploymentBucketName": {
+            "Value": "cloudplanner-us-east-1-deploys-tokens-dev"
+          },
+          "TokensLambdaFunctionQualifiedArn": {
+            "Description": "Current Lambda function version",
+            "Value": {
+              "Ref": "TokensLambdaVersionvQtUeWj2H9TaaSQKMFRvNVfeMCAlQItcopQEAj9ZUa0"
+            }
+          },
+          "ServiceEndpoint": {
+            "Description": "URL of the service endpoint",
+            "Value": {
+              "Fn::Join": [
+                "",
+                [
+                  "https://",
+                  {
+                    "Ref": "ApiGatewayRestApi"
+                  },
+                  ".execute-api.",
+                  {
+                    "Ref": "AWS::Region"
+                  },
+                  ".",
+                  {
+                    "Ref": "AWS::URLSuffix"
+                  },
+                  "/dev"
+                ]
+              ]
+            }
+          }
+        }
+      },
+      "vpc": {}
+    },
+    "pluginsData": {},
+    "functions": {
+      "tokens": {
+        "name": "cloudplanner-tokens-dev",
+        "handler": "tokens/tokens.get_tokens",
+        "events": [
+          {
+            "http": {
+              "path": "auth",
+              "method": "get",
+              "cors": {
+                "origin": "*",
+                "headers": [
+                  "Access-Control-Allow-Origin"
+                ],
+                "methods": [
+                  "OPTIONS",
+                  "GET"
+                ],
+                "allowCredentials": false
+              },
+              "integration": "AWS_PROXY"
+            }
+          }
+        ],
+        "package": {},
+        "memory": 128,
+        "timeout": 6,
+        "runtime": "python3.6",
+        "vpc": {},
+        "versionLogicalId": "TokensLambdaVersionvQtUeWj2H9TaaSQKMFRvNVfeMCAlQItcopQEAj9ZUa0"
+      }
+    },
+    "serviceFilename": "serverless.yml",
+    "layers": {},
+    "isDashboardMonitoringPreconfigured": false,
+    "artifact": "C:\\Users\\nbill\\Documents\\cloudplanner\\cloudplanner-tokens\\.serverless\\cloudplanner-auth.zip"
+  },
+  "package": {
+    "artifactDirectoryName": "serverless/cloudplanner-auth/dev/1587260176894-2020-04-19T01:36:16.894Z",
+    "artifact": "cloudplanner-auth.zip"
+  }
+}
